@@ -21,7 +21,9 @@ class MyApp : Application() {
                 viewModelModule,
                 repositoryModule,
                 networkModule,
-                remoteDataSourceModule
+                remoteDataSourceModule,
+                domainModule,
+                dataModule
             )
         }
     }

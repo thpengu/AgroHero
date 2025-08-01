@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.pengui.app.data.permission.PermissionManager
 import dev.pengui.app.domain.usecase.AnalyzePlantUseCase
+import dev.pengui.app.presentation.state.AnalyzePlantState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -48,10 +49,3 @@ class PlantAnalyzerViewModel(
     }
 }
 
-sealed class AnalyzePlantState {
-    object Idle : AnalyzePlantState()
-    object CameraReady : AnalyzePlantState()
-    object Analyzing : AnalyzePlantState()
-    data class Result(val analysis: dev.pengui.app.domain.usecase.PlantAnalysis) : AnalyzePlantState()
-    data class Error(val message: String) : AnalyzePlantState()
-}

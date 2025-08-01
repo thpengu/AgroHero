@@ -12,7 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import dev.pengui.app.presentation.viewmodel.AnalyzePlantState
+import dev.pengui.app.presentation.state.AnalyzePlantState
 import dev.pengui.app.presentation.viewmodel.PlantAnalyzerViewModel
 import org.koin.androidx.compose.koinViewModel
 import kotlin.collections.isNotEmpty
