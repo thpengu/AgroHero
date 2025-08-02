@@ -25,10 +25,10 @@ import androidx.navigation.compose.rememberNavController
 import dev.pengui.app.domain.model.Screen
 import dev.pengui.app.presentation.screen.HomeScreen
 import dev.pengui.app.presentation.state.MainUiState
+import dev.pengui.app.presentation.viewmodel.HomeViewModel
 import dev.pengui.app.presentation.viewmodel.MainViewModel
 import dev.pengui.ui.theme.AgroHeroTheme
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels()
@@ -37,39 +37,68 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
         setContent {
             AgroHeroTheme {
                 AppMain(
                     viewModel = viewModel,
-                    onPermissionRequest = { requestPermission() }
+                    onPermissionRequest = {
+                        requestPermissionsIfNeeded()
+                    }
                 )
             }
         }
     }
 
-    private fun requestPermission() {
-        when {
-            ContextCompat.checkSelfPermission(
+    private fun requestPermissionsIfNeeded() {
+        val cameraGranted = ContextCompat.checkSelfPermission(
+            this, Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
+
+        val locationGranted = ContextCompat.checkSelfPermission(
+            this, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (cameraGranted && locationGranted) {
+            viewModel.onPermissionGranted()
+        } else {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ),PERMISSION_REQUEST_CODE
+
+            )
+        }
+    }
+
+    /*private fun requestPermission() {
+        val permissionsToRequest = mutableListOf<String>()
+
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED) {
+            permissionsToRequest.add(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+
+        if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED -> {
-                viewModel.onPermissionGranted()
-            }
-
-            shouldShowRequestPermissionRationale(Manifest.permission.CAMERA) -> {
-                viewModel.showRationale()
-            }
-
-            else -> {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.CAMERA),
-                    CAMERA_PERMISSION_REQUEST_CODE
-                )
-            }
+            ) != PackageManager.PERMISSION_GRANTED) {
+            permissionsToRequest.add(Manifest.permission.CAMERA)
         }
-    }
+
+        if (permissionsToRequest.isNotEmpty()) {
+            ActivityCompat.requestPermissions(
+                this,
+                permissionsToRequest.toTypedArray(),
+                PERMISSION_REQUEST_CODE
+            )
+        } else {
+            viewModel.onPermissionGranted()
+        }
+    }*/
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -86,11 +115,20 @@ class MainActivity : ComponentActivity() {
                     viewModel.onPermissionDenied()
                 }
             }
+            PERMISSION_REQUEST_CODE -> {
+                val allGranted = grantResults.all { it == PackageManager.PERMISSION_GRANTED }
+                if (allGranted) {
+                    viewModel.onPermissionGranted()
+                } else {
+                    viewModel.onPermissionDenied()
+                }
+            }
         }
     }
 
     companion object {
         const val CAMERA_PERMISSION_REQUEST_CODE = 1001
+        const val PERMISSION_REQUEST_CODE = 1000
     }
 }
 
@@ -103,8 +141,10 @@ fun AppMain(
     val uiState by viewModel.uiState.collectAsState()
     val navController = rememberNavController()
 
-    // Handle side effects based on UI state
-    LaunchedEffect(uiState) {
+    LaunchedEffect(Unit) {
+        onPermissionRequest()
+    }
+    /*LaunchedEffect(uiState) {
         when (uiState) {
             is MainUiState.PermissionDenied -> {
 
@@ -114,7 +154,7 @@ fun AppMain(
             }
             else -> {}
         }
-    }
+    }*/
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -136,6 +176,7 @@ fun NavigationHost(
     onPermissionRequest: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val vm = koinViewModel<HomeViewModel>()
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route,
