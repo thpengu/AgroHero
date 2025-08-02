@@ -1,8 +1,5 @@
 package dev.pengui.app.presentation.viewmodel
 
-import android.util.Log
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.layout.LookaheadScope
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.pengui.app.data.repository.LocationClient
@@ -28,29 +25,49 @@ class HomeViewModel(
 
     fun loadData() {
         viewModelScope.launch {
-            Log.d("HomeVM", "Menu items: ${getMenuItems.invoke().size}")
             _uiState.value = _uiState.value.copy(isLoading = true)
             try {
-                Log.d("qalay2", "loadData() called")
                 val items = getMenuItems().toList()
-                Log.d("qalay2", "Fetched items: ${items.size}")
                 val location = locationClient.getCurrentLocation()
                 val menuItems = getMenuItems.invoke()
-                val weatherData = getWeather.invoke(41.3111, 69.2797) // Example: Tashkent coords
 
-                //val weatherData = getWeather.invoke(location.latitude, location.longitude)
+                /*
+                // First check if we have location permission
+                val hasLocationPermission = withContext(Dispatchers.IO) {
+                    ContextCompat.checkSelfPermission(
+                        context(),
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+                }
+
+                val weatherData = if (hasLocationPermission) {
+                    try {
+                        val location = locationClient.getCurrentLocation()
+                        getWeather.invoke(location.latitude, location.longitude)
+                    } catch (e: SecurityException) {
+                        Log.e("Location", "Permission revoked during operation", e)
+                        Result.failure(e)
+                    } catch (e: Exception) {
+                        Log.e("Location", "Error getting location", e)
+                        Result.failure(e)
+                    }
+                } else {
+
+                    Log.w("Location", "Using default coordinates - no permission")
+                    getWeather.invoke(41.3111, 69.2797) // Tashkent coords
+                }*/
+
+                val weatherData = getWeather.invoke(location.latitude, location.longitude)
                 _uiState.value = _uiState.value.copy(
                     menuItems = menuItems,
                     weatherData = weatherData.getOrNull(),
                     isLoading = false
                 )
-                Log.d("qalay2", "uiState on vm: ${uiState.value}")
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     error = e.message,
                     isLoading = false
                 )
-                Log.e("qalay2", "Error loading data", e)
             }
         }
     }
