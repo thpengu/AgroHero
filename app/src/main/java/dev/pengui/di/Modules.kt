@@ -15,6 +15,7 @@ import dev.pengui.app.domain.usecase.GetWeatherUseCase
 import dev.pengui.app.presentation.viewmodel.HomeViewModel
 import dev.pengui.app.presentation.viewmodel.MainViewModel
 import dev.pengui.app.presentation.viewmodel.WeatherViewModel
+import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -51,8 +52,8 @@ val appModule = module {
     single { PermissionManager(get()) }
     single<LocationClient> {
         DefaultLocationClient(
-            context = get(),
-            client = LocationServices.getFusedLocationProviderClient(get())
+            context = androidContext(),
+            client = LocationServices.getFusedLocationProviderClient(androidContext())
         )
     }
 }
