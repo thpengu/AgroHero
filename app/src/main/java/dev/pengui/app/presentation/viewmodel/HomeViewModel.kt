@@ -2,6 +2,7 @@ package dev.pengui.app.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.pengui.app.data.repository.LocationClient
 import dev.pengui.app.domain.usecase.GetMenuItemUseCase
 import dev.pengui.app.domain.usecase.GetWeatherUseCase
 import dev.pengui.app.presentation.state.HomeUiState
@@ -11,7 +12,8 @@ import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val getMenuItems: GetMenuItemUseCase,
-    private val getWeather: GetWeatherUseCase
+    private val getWeather: GetWeatherUseCase,
+    private val locationClient: LocationClient
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -25,11 +27,12 @@ class HomeViewModel(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             try {
+                val location = locationClient.getCurrentLocation()
                 val menuItems = getMenuItems.invoke()
-                val weatherData = getWeather.invoke()
+                val weatherData = getWeather.invoke(location.latitude, location.longitude)
                 _uiState.value = _uiState.value.copy(
                     menuItems = menuItems,
-                    weatherData = weatherData,
+                    weatherData = weatherData.getOrNull(),
                     isLoading = false
                 )
             } catch (e: Exception) {

@@ -1,9 +1,11 @@
 package dev.pengui.di
 
-import PlantAnalyzerApi
-import PlantIdApi
-import android.content.Context
+import com.google.android.gms.location.LocationServices
+import dev.pengui.BuildConfig
+import dev.pengui.app.data.datasource.remote.WeatherApi
 import dev.pengui.app.data.permission.PermissionManager
+import dev.pengui.app.data.repository.DefaultLocationClient
+import dev.pengui.app.data.repository.LocationClient
 import dev.pengui.app.data.repository.MenuRepository
 import dev.pengui.app.data.repository.WeatherRepository
 import dev.pengui.app.data.repository.impl.MenuRepoImpl
@@ -11,18 +13,22 @@ import dev.pengui.app.data.repository.impl.WeatherRepoImpl
 import dev.pengui.app.domain.usecase.GetMenuItemUseCase
 import dev.pengui.app.domain.usecase.GetWeatherUseCase
 import dev.pengui.app.presentation.viewmodel.HomeViewModel
-import org.koin.android.ext.koin.androidContext
+import dev.pengui.app.presentation.viewmodel.MainViewModel
+import dev.pengui.app.presentation.viewmodel.WeatherViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 val networkModule = module {
-//    single { createOkHttpClient() }
-//    single { createRetrofit(get()) }
-//    single { createPlantIdApi(get()) }
-}
-
-val repositoryModule = module {
-    //single<PlantAnalysisRepository> { PlantAnalysisRepositoryImpl(get(), get()) }
+    single {
+        Retrofit.Builder()
+            .baseUrl("https://api.openweathermap.org/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(WeatherApi::class.java)
+    }
 }
 
 val domainModule = module {
@@ -31,23 +37,26 @@ val domainModule = module {
 }
 
 val dataModule = module {
-    // Repositories
     single<MenuRepository> { MenuRepoImpl() }
-    single<WeatherRepository> { WeatherRepoImpl() }
+    single<WeatherRepository> { WeatherRepoImpl(get(), get(named("API_KEY"))) }
 }
 
 val viewModelModule = module {
-    viewModel { HomeViewModel(get(), get()) }
-    //viewModel { PlantA }
-    //viewModel { P }
+    viewModel { HomeViewModel(getMenuItems = get(), getWeather = get(), locationClient = get()) }
+    viewModel { WeatherViewModel(get(), get()) }
+    viewModel { MainViewModel() }
 }
 
-// App module (general dependencies)
 val appModule = module {
     single { PermissionManager(get()) }
-    //single { ImageService(get(), get()) }
-    single<Context> { androidContext() }
+    single<LocationClient> {
+        DefaultLocationClient(
+            context = get(),
+            client = LocationServices.getFusedLocationProviderClient(get())
+        )
+    }
 }
-val remoteDataSourceModule = module {
-    //single<PlantAnalyzerApi> { PlantIdApi(get()) }
+
+val configModule = module {
+    single(named("API_KEY")) { BuildConfig.WEATHER_API_KEY }
 }

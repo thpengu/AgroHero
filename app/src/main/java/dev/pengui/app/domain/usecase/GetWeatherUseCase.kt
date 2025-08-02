@@ -1,12 +1,15 @@
 package dev.pengui.app.domain.usecase
 
 import dev.pengui.app.data.repository.WeatherRepository
-import dev.pengui.app.domain.model.WeatherData
+import dev.pengui.app.domain.model.Weather
 
-class GetWeatherUseCase (
+class GetWeatherUseCase(
     private val repository: WeatherRepository
 ) {
-    suspend operator fun invoke(): WeatherData {
-        return repository.getWeather()
+    suspend operator fun invoke(
+        latitude: Double,
+        longitude: Double
+    ): Result<Weather> {
+        return repository.getWeather(latitude, longitude)
     }
 }
