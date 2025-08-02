@@ -19,12 +19,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import dev.pengui.app.domain.model.MenuItem
 
 @Composable
- fun MenuItemCard(item: MenuItem) {
+ fun MenuItemCard(item: MenuItem, navController: NavController) {
     Card(
-        onClick = { /* Handle click */ },
+        onClick = {
+            navController.navigate(item.route)
+        },
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1f),

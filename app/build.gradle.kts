@@ -56,6 +56,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.foundation.layout)
     implementation(libs.play.services.location)
+    implementation(libs.androidx.foundation)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -96,5 +97,15 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
     implementation("androidx.compose.runtime:runtime-livedata:1.5.4")
+
+    // Image Picker
+    implementation("com.github.Drjacky:ImagePicker:2.3.22")
+    // HTTP Client
+    implementation("com.squareup.okhttp3:okhttp:5.1.0")
+
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
+
+    implementation("com.github.yalantis:ucrop:2.2.8")
+
 
 }

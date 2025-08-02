@@ -14,12 +14,12 @@ fun AppNavGraph(navController: NavHostController) {
         startDestination = Screen.Home.route
     ) {
         composable(Screen.Home.route) { HomeScreen(navController) }
-        composable(Screen.PlantAnalyzer.route) { PlantAnalyzerScreen() }
+        composable(Screen.PlantAnalyzer.route) { PlantAnalyzerScreen(navController) }
         // Add other screens
     }
 }
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
-    object PlantAnalyzer : Screen("plant_analyzer")
+    object PlantAnalyzer : Screen("analyzer")
 }

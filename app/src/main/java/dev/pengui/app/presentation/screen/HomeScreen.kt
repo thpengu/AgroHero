@@ -57,7 +57,7 @@ fun HomeScreen(
             modifier = Modifier.weight(1f)
         ) {
             items(uiState.menuItems) { item ->
-                MenuItemCard(item = item)
+                MenuItemCard(item = item, navController)
             }
         }
 
